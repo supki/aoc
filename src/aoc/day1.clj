@@ -5,11 +5,11 @@
   (with-open [r (io/reader path)]
     (vec (line-seq r))))
 
-(defn parse-rotation [str]
-  (case (first str)
-    \R (Integer/parseInt (subs str 1))
-    \L (- (Integer/parseInt (subs str 1)))
-    :else (throw (Exception. (format "invalid rotation line: %s" str)))))
+(defn parse-rotation [s]
+  (case (first s)
+    \R (Integer/parseInt (subs s 1))
+    \L (- (Integer/parseInt (subs s 1)))
+    :else (throw (Exception. (format "invalid rotation line: %s" s)))))
 
 (def starting-dial-position 50)
 
