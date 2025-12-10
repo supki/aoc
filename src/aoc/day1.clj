@@ -21,39 +21,42 @@
 (defn rotations [x ys]
   (reductions rotate-once x ys))
 
-(defn password1 [xs]
+(defn password-part1 [xs]
   (count (filter #(= % 0) (rotations starting-dial-position xs))))
 
-(defn rotate-once2 [x y]
-  (cond
-    (> y 0)
-    (let [z (+ x y)]
-      [(abs (quot z total-positions)) (mod z total-positions)])
-    :else
-    ;; for negative (left) rotations, we "flip" the dial position
-    ;; and apply the positive (right) rotation of the same
-    ;; absolute value instead
-    (let [flip #(mod (- total-positions %) total-positions)
-          [n p] (rotate-once2 (flip x) (abs y))]
-      [n (flip p)])))
+(defn rotate-once-but-fancy [x0 y0]
+  (let [rotate-step
+        (fn [x y]
+          (let [z (+ x y)]
+            [(abs (quot z total-positions)) (mod z total-positions)]))]
+    (cond
+      (pos? y0)
+      (rotate-step x0 y0)
+      :else
+      ;; for negative (left) rotations, we "flip" the dial position
+      ;; and apply the positive (right) rotation of the same
+      ;; absolute value instead
+      (let [flip #(mod (- total-positions %) total-positions)
+            [n p] (rotate-step (flip x0) (abs y0))]
+        [n (flip p)]))))
 
-(defn password2 [xs]
+(defn password-part2 [xs]
   (->> xs
        (reductions
          (fn [[n p] r]
-           (rotate-once2 p r))
+           (rotate-once-but-fancy p r))
          [0 starting-dial-position])
        (map first)
        (reduce + 0)))
 
-(defn solution1 [path]
+(defn solution-part1 [path]
   (->> path
        read-input-to-vec
        (map parse-rotation)
-       password1))
+       password-part1))
 
-(defn solution2 [path]
+(defn solution-part2 [path]
   (->> path
        read-input-to-vec
        (map parse-rotation)
-       password2))
+       password-part2))
