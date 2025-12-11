@@ -10,11 +10,8 @@
 (defn parse-range [s]
   (apply ->Range (map parse-long (str/split s #"-"))))
 
-(defn parse-list [s]
-  (str/split s #","))
-
 (defn parse [s]
-  (map parse-range (parse-list s)))
+  (map parse-range (str/split s #",")))
 
 ; we can obviously compute prime factors,
 ; but there's just not enough variance in
@@ -32,7 +29,8 @@
    10 [2 5]})
 
 (defn range-prime-factors [{:keys [lo hi]}]
-  (distinct (concat (prime-factors (count (str lo))) (prime-factors (count (str hi))))))
+  (distinct
+    (mapcat prime-factors [(count (str lo)) (count (str hi))])))
 
 (defn split-every [n s]
   (map #(apply str %) (partition n s)))
@@ -40,13 +38,13 @@
 (defn duplicatee-seq-starting-with [n d]
   (let [n-str (str n)
         n-length (count n-str)
-        n-chunk-length (long (/ n-length d))]
-    (if (= (mod n-length d) 0)
+        n-chunk-length (quot n-length d)]
+    (if (zero? (mod n-length d))
       ; every number is split in d chunks where d >= 2
       (let [[n-chunk-1 n-chunk-2] (map parse-long (split-every n-chunk-length n-str))]
         (if (>= n-chunk-1 n-chunk-2)
           n-chunk-1
-          (+ n-chunk-1 1)))
+          (inc n-chunk-1)))
       (long (Math/pow 10 n-chunk-length)))))
 
 ; cute names never ever bite me in the ass
@@ -54,14 +52,17 @@
   (parse-long (apply str (replicate n x))))
 
 (defn invalid-ids-with-prime-factor [d {:keys [lo hi]}]
-  (take-while #(<= % hi) (map #(nplicate d %) (iterate inc (duplicatee-seq-starting-with lo d)))))
+  (->> (duplicatee-seq-starting-with lo d)
+       (iterate inc)
+       (map #(nplicate d %))
+       (take-while #(<= % hi))))
 
 (defn invalid-ids-part1 [r]
   (invalid-ids-with-prime-factor 2 r))
 
 ; this should probably be a k-way merge, but the problem is small enough
 (defn invalid-ids-part2 [r]
-  (distinct (mapcat #(invalid-ids-with-prime-factor % r) (range-prime-factors r))))
+  (into #{} (mapcat #(invalid-ids-with-prime-factor % r) (range-prime-factors r))))
 
 (defn solution-part1 [path]
   (->> path
