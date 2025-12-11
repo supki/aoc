@@ -16,27 +16,63 @@
 (defn parse [s]
   (map parse-range (parse-list s)))
 
-(defn duplicatee-seq-from [n]
+; we can obviously compute prime factors,
+; but there's just not enough variance in
+; lengths of numbers in the problem input
+; not to hardcode them
+(def prime-factors
+  {2 [2]
+   3 [3]
+   4 [2]
+   5 [5]
+   6 [2 3]
+   7 [7]
+   8 [2]
+   9 [3]
+   10 [2 5]})
+
+(defn range-prime-factors [{:keys [lo hi]}]
+  (distinct (concat (prime-factors (count (str lo))) (prime-factors (count (str hi))))))
+
+(defn split-every [n s]
+  (map #(apply str %) (partition n s)))
+
+(defn duplicatee-seq-starting-with [n d]
   (let [n-str (str n)
         n-length (count n-str)
-        n-part-length (int (/ n-length 2))]
-    (if (even? n-length)
-      (let [n-part-1 (parse-long (subs n-str 0 n-part-length))
-            n-part-2 (parse-long (subs n-str n-part-length))]
-        (if (>= n-part-1 n-part-2)
-          n-part-1
-          (+ n-part-1 1)))
-      (long (Math/pow 10 n-part-length)))))
+        n-chunk-length (long (/ n-length d))]
+    (if (= (mod n-length d) 0)
+      ; every number is split in d chunks where d >= 2
+      (let [[n-chunk-1 n-chunk-2] (map parse-long (split-every n-chunk-length n-str))]
+        (if (>= n-chunk-1 n-chunk-2)
+          n-chunk-1
+          (+ n-chunk-1 1)))
+      (long (Math/pow 10 n-chunk-length)))))
 
-(defn duplicate [n]
-  (parse-long (str n n)))
+; cute names never ever bite me in the ass
+(defn nplicate [n x]
+  (parse-long (apply str (replicate n x))))
 
-(defn invalid-ids [{:keys [lo hi]}]
-  (take-while #(<= % hi) (map duplicate (iterate inc (duplicatee-seq-from lo)))))
+(defn invalid-ids-with-prime-factor [d {:keys [lo hi]}]
+  (take-while #(<= % hi) (map #(nplicate d %) (iterate inc (duplicatee-seq-starting-with lo d)))))
+
+(defn invalid-ids-part1 [r]
+  (invalid-ids-with-prime-factor 2 r))
+
+; this should probably be a k-way merge, but the problem is small enough
+(defn invalid-ids-part2 [r]
+  (distinct (mapcat #(invalid-ids-with-prime-factor % r) (range-prime-factors r))))
 
 (defn solution-part1 [path]
   (->> path
        read-input-to-string
        parse
-       (mapcat invalid-ids)
+       (mapcat invalid-ids-part1)
+       (reduce +)))
+
+(defn solution-part2 [path]
+  (->> path
+       read-input-to-string
+       parse
+       (mapcat invalid-ids-part2)
        (reduce +)))
