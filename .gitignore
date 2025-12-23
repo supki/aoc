@@ -1,0 +1,6 @@
+.lein-repl-history
+.lein-failures
+.nrepl-port
+*/target/
+*/input/*.problem
+*/output/*
