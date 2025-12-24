@@ -7,5 +7,8 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
+    # Java stacktraces are extremely useful and totally
+    # not a waste of space.
+    export JVM_OPTS="-XX:MaxJavaStackTraceDepth=3"
   '';
 }
