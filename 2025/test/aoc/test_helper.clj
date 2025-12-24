@@ -6,8 +6,7 @@
 (defn read-answer [path]
   (->> path
        slurp
-       str/trim-newline
-       parse-long))
+       str/trim-newline))
 
 (defn write-answer [path answer]
   (spit path (str answer "\n")))
@@ -17,7 +16,7 @@
     (if
       (.exists golden-file)
       (let [golden-answer (read-answer golden-file)]
-        (is (= answer golden-answer)))
+        (is (= (str answer) golden-answer)))
       (do
         (write-answer path answer)
         (is true)))))
