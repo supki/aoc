@@ -15,6 +15,11 @@
         (recur (inc acc) (subs s 1)))
       acc)))
 
+; this algorithm completely depends on "inner" repeaters
+; never repeating past "outer" repeaters (e.g. (20x10)(1000000x5) never happens)
+;
+; apparently, this was obvious for most people in 2016, but the problem had been
+; quite confusing for me before I decided to check the input for this
 (defn decompressed-length-part2 [s0]
   (loop [acc 0
          s s0]
@@ -23,7 +28,8 @@
         (let [matched-length (count matched)
               chunk-length (parse-long chunk-length-s)
               repetitions (parse-long repetitions-s)
-              decompressed-chunk-length (decompressed-length-part2 (subs s matched-length (+ matched-length chunk-length)))]
+              decompressed-chunk-length (decompressed-length-part2
+                                          (subs s matched-length (+ matched-length chunk-length)))]
           (recur (+ acc (* decompressed-chunk-length repetitions))
                  (subs s (+ matched-length chunk-length))))
         (recur (inc acc) (subs s 1)))
