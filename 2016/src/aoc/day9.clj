@@ -20,6 +20,8 @@
 ;
 ; apparently, this was obvious for most people in 2016, but the problem had been
 ; quite confusing for me before I decided to check the input for this
+;
+; TODO: check this https://www.reddit.com/r/adventofcode/comments/5hbygy/comment/dazentu/
 (defn decompressed-length-part2 [s0]
   (loop [acc 0
          s s0]
